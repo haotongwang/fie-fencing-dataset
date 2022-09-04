@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-from pools.pool_data import PoolData
+from typing import List
+
 import numpy as np
+from pools.pool_data import PoolData
 
 
 @dataclass
@@ -20,9 +22,9 @@ class TournamentData:
     url : str
         The URL (constructed from season and competitionID) used to find event page
 
-    All other attributes are directly pulled from the JSON window._competition object 
+    All other attributes are directly pulled from the JSON window._competition object
     with the following relabelings:
-        startDate     -> start_date  
+        startDate     -> start_date
         endDate       -> end_date
         competitionId -> competition_ID
     '''
@@ -39,7 +41,7 @@ class TournamentData:
     timezone: str
     url: str
 
-    pools_list: list[PoolData]
+    pools_list: List[PoolData]
     fencers_dict: dict
 
     missing_results_flag : str = ""

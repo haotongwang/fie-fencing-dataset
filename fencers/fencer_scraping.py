@@ -1,15 +1,18 @@
-import requests
 import json
 from datetime import date, datetime
 from os import path, stat
-from bs4 import BeautifulSoup
-import pandas as pd
-import tabulate
-from progress.bar import Bar
+from pathlib import Path
 
-from helper.soup_scraping import get_json_var_from_script
+import pandas as pd
+import requests
+import tabulate
+from bs4 import BeautifulSoup
 from helper.caching_methods import save_dict_to_cache
-from helper.dataframe_columns import FENCERS_RANKINGS_MULTI_INDEX, FENCERS_RANKINGS_DF_COLS, FENCERS_BIO_DF_COLS
+from helper.dataframe_columns import (FENCERS_BIO_DF_COLS,
+                                      FENCERS_RANKINGS_DF_COLS,
+                                      FENCERS_RANKINGS_MULTI_INDEX)
+from helper.soup_scraping import get_json_var_from_script
+from progress.bar import Bar
 
 CACHE_FILENAME = 'fencers/fencer_cache.txt'
 
@@ -20,10 +23,10 @@ def get_req_content(fencer_ID, use_req_cache=True):
 
         Input:
         ------
-        fencer_ID : int 
+        fencer_ID : int
             ID for the fencer to get page content for
         use_req_cache : boolean (default True)
-            Flag allowing use of cache, if false will always pull 
+            Flag allowing use of cache, if false will always pull
             new request and load and store the new data to cache
 
         Output:
@@ -31,7 +34,8 @@ def get_req_content(fencer_ID, use_req_cache=True):
         content : bytes
             Represents the `content` of a requests.get to the fencers url
     """
-    path_name = "fencers/athlete_pages/"+str(fencer_ID)+".txt"
+    dir_path = "fencers/athlete_pages/"
+    path_name = dir_path + str(fencer_ID) + ".txt"
     if (path.exists(path_name) and use_req_cache):
         with open(path_name, 'rb') as cache_file:
             content = cache_file.read()
@@ -39,6 +43,7 @@ def get_req_content(fencer_ID, use_req_cache=True):
         fencer_url = "https://fie.org/athletes/"+str(fencer_ID)
         req = requests.get(fencer_url)
         content = req.content
+        Path(dir_path).mkdir(parents=True, exist_ok=True)
         with open(path_name, 'wb') as cache_file:
             cache_file.write(content)
     return content
@@ -46,20 +51,20 @@ def get_req_content(fencer_ID, use_req_cache=True):
 
 def get_fencer_nationality_data(soup):
     """
-    From the fencer's soup extracts country_code and country_name 
+    From the fencer's soup extracts country_code and country_name
 
         Input:
         ------
         soup: bs4.BeautifulSoup
-            A BeautifulSoup object created from the request content 
+            A BeautifulSoup object created from the request content
             from a fencers page (using 'html.parser')
 
         Output:
         -------
-        country_code : str 
-            Three letter code for fencer's country 
-        country_name : str 
-            Full name of the fencer's country 
+        country_code : str
+            Three letter code for fencer's country
+        country_name : str
+            Full name of the fencer's country
     """
     try:
         flag_span = soup.find('span', class_='AthleteHero-flag')
@@ -85,14 +90,14 @@ def get_fencer_bio_from_soup(soup, fencer_ID):
         Input:
         ------
         soup: bs4.BeautifulSoup
-            A BeautifulSoup object created from the request content 
+            A BeautifulSoup object created from the request content
             from a fencers page (using 'html.parser')
         fencer_ID : int
             ID for the fencer to get bio for
 
         Output:
         ------
-        fencer_bio_dict : dict 
+        fencer_bio_dict : dict
             Dictionary with fencer's bio data
                 keys : 'name', 'country_code', 'country', 'hand', 'age'
 
@@ -151,17 +156,17 @@ def get_fencer_rankings_list_from_soup(soup, fencer_ID, url):
         Input:
         ------
         soup: bs4.BeautifulSoup
-            A BeautifulSoup object created from the request content 
+            A BeautifulSoup object created from the request content
             from a fencers page (using 'html.parser')
         fencer_ID : int
             ID for the fencer to get rankings data for
-        url : str 
+        url : str
             URL of the fencers page to make separate weapon page calls
 
         Output:
         -------
         fencer_rankings_list : list
-            List of rankings, each represented as a dict with 
+            List of rankings, each represented as a dict with
             keys : "id", "rank", "points", "weapon", "season", "category"
     """
     # get weapons list from <select class="ProfileInfo-weaponDropdown...">
@@ -209,8 +214,8 @@ def get_fencer_info_from_ID(fencer_ID, use_data_cache=True, use_req_cache=True):
 
         Output:
         -------
-        fencer_dict : dict 
-            Dictionary containing both bio and rankings data for a fencer 
+        fencer_dict : dict
+            Dictionary containing both bio and rankings data for a fencer
             Keys are combined from fencer_bio_dict (from get_fencer_bio_from_soup)
                 and fencer_rankings_dict (from get_fencer_rankings_list_from_soup)
 
@@ -218,7 +223,7 @@ def get_fencer_info_from_ID(fencer_ID, use_data_cache=True, use_req_cache=True):
         --------
         fencer_cache.txt
             If creating fencer_dict (not loading from fencer_cache.txt) saves to cache
-        athlete_pages/ 
+        athlete_pages/
             If loading request page (not loading from athlete_pages/) saves to cache
     """
 
@@ -264,7 +269,7 @@ def load_fencer_data(all_fencer_bio_data_list, all_fencer_ranking_data_list, fen
         ------
         all_fencer_bio_data_list : list
             Accumulating list of bio data for all fencers being processed
-        all_fencer_ranking_data_list : list 
+        all_fencer_ranking_data_list : list
             Accumulating list of rankings data for all fencers being processed
 
         fencer_ID_list : list
@@ -312,7 +317,7 @@ def get_fencer_data_lists_from_ID_list(fencer_ID_list, use_data_cache=True, use_
         -------
         all_fencer_bio_data_list : list
             List of bio data for all fencers in fencer_ID_list
-        all_fencer_ranking_data_list : list 
+        all_fencer_ranking_data_list : list
             :ist of rankings data for all fencers in fencer_ID_list
     """
     if 0 in fencer_ID_list:
@@ -328,7 +333,7 @@ def get_fencer_data_lists_from_ID_list(fencer_ID_list, use_data_cache=True, use_
     print("Processing {} fencers by ID ".format(len(fencer_ID_list)), end="")
 
     # split fencers into cached and not for progress bars
-    if use_data_cache:
+    if use_data_cache and path.exists(CACHE_FILENAME):
         with open(CACHE_FILENAME) as fencer_cache:
             cached_data = json.load(fencer_cache)
             cached_IDs = [int(id) for id in list(
@@ -339,7 +344,7 @@ def get_fencer_data_lists_from_ID_list(fencer_ID_list, use_data_cache=True, use_
         print("")
     uncached_IDs = list(set(fencer_ID_list) - set(cached_IDs))
 
-    # load fencer data for uncached then cached and 
+    # load fencer data for uncached then cached and
     # add data to all_fencer_bio_data_list, all_fencer_ranking_data_list
     load_fencer_data(all_fencer_bio_data_list, all_fencer_ranking_data_list,
                      uncached_IDs, use_data_cache=use_data_cache, use_req_cache=use_req_cache, label="uncached fencers")

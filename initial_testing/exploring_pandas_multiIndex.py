@@ -1,12 +1,11 @@
-import requests
 import json
 from datetime import date, datetime
 from os import path, stat
-from bs4 import BeautifulSoup
+
 import pandas as pd
-
+import requests
 import tabulate
-
+from bs4 import BeautifulSoup
 
 
 def test_multi_index_by_div():
@@ -60,10 +59,10 @@ def test_multi_index_by_div():
     print(ranking_dataframe1)
     print(ranking_dataframe2)
 
-    # combine these dataframes? 
+    # combine these dataframes?
     comb_ranking_dataframe = pd.concat([ranking_dataframe1,ranking_dataframe2], keys =["id1","id2"])
     print(comb_ranking_dataframe)
-    return 
+    return
 
 
 test_multi_index_by_div()

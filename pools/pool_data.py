@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from typing import List
+
 import numpy as np
 
 
@@ -18,15 +20,15 @@ class PoolData:
     winners : np.ndarray
         np binary array with 1's indicating bout winners
     scores : np.ndarray
-        np array of scores representing the pool table 
+        np array of scores representing the pool table
     '''
     pool_ID: int
     pool_size: int
-    fencer_names: list[str]
-    fencer_IDs: list[int]
+    fencer_names: List[str]
+    fencer_IDs: List[int]
     winners: np.ndarray
     scores: np.ndarray
-    date: str # come back an change to date 
+    date: str # come back an change to date
 
 
     def __str__(self):
@@ -40,7 +42,7 @@ class PoolData:
         str_rep += "\n"
 
         for idx, name in enumerate(self.fencer_names):
-            # center the ID value in the parens? 
+            # center the ID value in the parens?
             str_rep += "#{i} {name:<20s} (ID {id: <5})  |".format(
                 i=idx+1, name=name[0:19], id=self.fencer_IDs[idx])
             for j in range(0, self.pool_size):
@@ -53,9 +55,9 @@ class PoolData:
             str_rep += "\n"
         str_rep += "\n"
         return str_rep
-    
+
     def get_fencer_name_by_idx(self, idx):
         return self.fencer_names[idx]
-    
+
     def get_fencer_ID_by_idx(self, idx):
         return self.fencer_IDs[idx]

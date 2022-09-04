@@ -1,17 +1,19 @@
-import re
-import requests
 import json
-from bs4 import BeautifulSoup
-import pandas as pd
+import re
 from os import path, stat
+from pathlib import Path
+
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+from helper.caching_methods import (load_all_cached_fencers_rankings,
+                                    save_dict_to_cache)
+from helper.dataframe_columns import BOUTS_DF_COLS
+from helper.soup_scraping import get_json_var_from_script
+from pools.pool_scraping import get_pool_data_from_dict
 from progress.bar import Bar
 
-from helper.dataframe_columns import BOUTS_DF_COLS
-from pools.pool_scraping import get_pool_data_from_dict
 from tournaments.tournament_data import TournamentData
-from helper.soup_scraping import get_json_var_from_script
-from helper.caching_methods import load_all_cached_fencers_rankings, save_dict_to_cache
-
 
 CACHE_FILENAME = 'tournaments/tournament_cache.txt'
 
@@ -27,11 +29,13 @@ def get_req_content(tournament_url):
     tournement_url_pieces = tournament_url.split("/")
     tournament_filename = str(
         tournement_url_pieces[-2])+"-" + str(tournement_url_pieces[-1])
-    path_name = "tournaments/tournament_pages/" + tournament_filename + ".txt"
+    dir_path = "tournaments/tournament_pages/"
+    path_name = dir_path + tournament_filename + ".txt"
     if not path.exists(path_name):
         fencer_url = "https://fie.org/tournament_pages/" + tournament_filename + ".txt"
         req = requests.get(tournament_url)
         content = req.content
+        Path(dir_path).mkdir(parents=True, exist_ok=True)
         with open(path_name, 'wb') as cache_file:
             cache_file.write(content)
     else:
@@ -106,7 +110,7 @@ def create_tournament_data_from_url(tournament_url):
 
         Output:
             has_results_data : bool
-                Indicates whether the tournament has results data. 
+                Indicates whether the tournament has results data.
                 False may indicate missing fencer IDs or no results/pool results.
             tournament : TournamentData
                 A TournamentData object (see tournament_data.py) which contains general tournament
@@ -255,7 +259,7 @@ def process_tournament_data_from_urls(list_of_urls, use_cache=True):
 
     print("Processing {} tournaments by URL ".format(len(list_of_urls)), end="")
 
-    if use_cache:
+    if use_cache and path.exists(CACHE_FILENAME):
         with open(CACHE_FILENAME) as file_cache:
             cached_data = json.load(file_cache)
             cached_URLS = [url for url in list(

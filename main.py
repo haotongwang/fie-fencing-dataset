@@ -1,12 +1,13 @@
-import pandas as pd
 from datetime import date
-from os import path, makedirs
+from os import makedirs, path
+
+import pandas as pd
 
 from helper.get_results import get_results_for_division
 
-save_results = True 
+save_results = True
 
-weapon = 'f'
+weapon = 's'
 gender = 'f'
 category = ''
 
@@ -22,7 +23,7 @@ print("----------------------------------------------------------------------\n\
 
 
 tourn_df, bout_df, fencers_bio_df, fencers_rankings_df = get_results_for_division(
-    weapon=[weapon], gender=[gender], category=category, 
+    weapon=[weapon], gender=[gender], category=category,
     use_tournament_cache=True, use_fencer_data_cache=True, use_fencer_req_cache=True)
 
 if save_results:
@@ -38,12 +39,12 @@ if save_results:
         name = name_list[idx]
         file_name = div_name + "_" + name + "_" + date_string + ".csv"
         df.to_csv(directory+file_name, index=False)
-    
+
     name = 'fencer_rankings_data'
     file_name = div_name + "_" + name + "_" + date_string + ".csv"
     fencers_rankings_df.to_csv(directory+file_name)
 
-else: # store in a temp cache just in case! 
+else: # store in a temp cache just in case!
     date_string = date.today().strftime("%b_%d_%Y")
     directory = 'temp_cache/'+date_string+"/"
 
@@ -55,7 +56,7 @@ else: # store in a temp cache just in case!
         name = name_list[idx]
         file_name = div_name + "_" + name + "_" + date_string + ".csv"
         df.to_csv(directory+file_name, index=False)
-    
+
     name = 'fencer_rankings_data'
     file_name = div_name + "_" + name + "_" + date_string + ".csv"
     fencers_rankings_df.to_csv(directory+file_name)
